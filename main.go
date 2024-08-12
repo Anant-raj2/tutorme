@@ -9,42 +9,59 @@ import (
 	"strings"
 )
 
-func main() {
-  fromAddr := flag.String("from", "127.0.0.1:9090", "proxy's listening address")
-  toAddr1 := flag.String("to1", "127.0.0.1:8080", "the first address this proxy will forward to")
-  toAddr2 := flag.String("to2", "127.0.0.1:8081", "the second address this proxy will forward to")
-  flag.Parse()
-
-  toUrl1 := parseToUrl(*toAddr1)
-  toUrl2 := parseToUrl(*toAddr2)
-
-  proxy := loadBalancingReverseProxy(toUrl1, toUrl2)
-  log.Println("Starting proxy server on", *fromAddr)
-  if err := http.ListenAndServe(*fromAddr, proxy); err != nil {
-    log.Fatal("ListenAndServe:", err)
-  }
+type forwardProxy struct {
 }
 
-func loadBalancingReverseProxy(target1, target2 *url.URL) *httputil.ReverseProxy {
-  var targetNum = 1
+func (p *forwardProxy) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+  // The "Host:" header is promoted to Request.Host and is removed from
+  // request.Header by net/http, so we print it out explicitly.
+  log.Println(req.RemoteAddr, "\t\t", req.Method, "\t\t", req.URL, "\t\t Host:", req.Host)
+  log.Println("\t\t\t\t\t", req.Header)
 
-  director := func(req *http.Request) {
-    var target *url.URL
-    // Simple round robin between the two targets
-    if targetNum == 1 {
-      target = target1
-      targetNum = 2
-    } else {
-      target = target2
-      targetNum = 1
-    }
-
-    req.URL.Scheme = target.Scheme
-    req.URL.Host = target.Host
-    req.URL.Path, req.URL.RawPath = joinURLPath(target, req.URL)
-    // For simplicity, we don't handle RawQuery or the User-Agent header here:
-    // see the full code of NewSingleHostReverseProxy for an example of doing
-    // that.
+  if req.URL.Scheme != "http" && req.URL.Scheme != "https" {
+    msg := "unsupported protocal scheme " + req.URL.Scheme
+    http.Error(w, msg, http.StatusBadRequest)
+    log.Println(msg)
+    return
   }
-  return &httputil.ReverseProxy{Director: director}
+
+  client := &http.Client{}
+  // When a http.Request is sent through an http.Client, RequestURI should not
+  // be set (see documentation of this field).
+  req.RequestURI = ""
+
+  removeHopHeaders(req.Header)
+  removeConnectionHeaders(req.Header)
+
+  if clientIP, _, err := net.SplitHostPort(req.RemoteAddr); err == nil {
+    appendHostToXForwardHeader(req.Header, clientIP)
+  }
+
+  resp, err := client.Do(req)
+  if err != nil {
+    http.Error(w, "Server Error", http.StatusInternalServerError)
+    log.Fatal("ServeHTTP:", err)
+  }
+  defer resp.Body.Close()
+
+  log.Println(req.RemoteAddr, " ", resp.Status)
+
+  removeHopHeaders(resp.Header)
+  removeConnectionHeaders(resp.Header)
+
+  copyHeader(w.Header(), resp.Header)
+  w.WriteHeader(resp.StatusCode)
+  io.Copy(w, resp.Body)
+}
+
+func main() {
+  var addr = flag.String("addr", "127.0.0.1:9999", "proxy address")
+  flag.Parse()
+
+  proxy := &forwardProxy{}
+
+  log.Println("Starting proxy server on", *addr)
+  if err := http.ListenAndServe(*addr, proxy); err != nil {
+    log.Fatal("ListenAndServe:", err)
+  }
 }
