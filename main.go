@@ -10,26 +10,41 @@ import (
 )
 
 func main() {
-	addr := flag.String("addr", "127.0.0.1:8080", "listen address")
-	flag.Parse()
+  fromAddr := flag.String("from", "127.0.0.1:9090", "proxy's listening address")
+  toAddr1 := flag.String("to1", "127.0.0.1:8080", "the first address this proxy will forward to")
+  toAddr2 := flag.String("to2", "127.0.0.1:8081", "the second address this proxy will forward to")
+  flag.Parse()
 
-	http.HandleFunc("/",
-		func(w http.ResponseWriter, req *http.Request) {
-			var b strings.Builder
+  toUrl1 := parseToUrl(*toAddr1)
+  toUrl2 := parseToUrl(*toAddr2)
 
-			fmt.Fprintf(&b, "%v\t%v\t%v\tHost: %v\n", req.RemoteAddr, req.Method, req.URL, req.Host)
-			for name, headers := range req.Header {
-				for _, h := range headers {
-					fmt.Fprintf(&b, "%v: %v\n", name, h)
-				}
-			}
-			log.Println(b.String())
+  proxy := loadBalancingReverseProxy(toUrl1, toUrl2)
+  log.Println("Starting proxy server on", *fromAddr)
+  if err := http.ListenAndServe(*fromAddr, proxy); err != nil {
+    log.Fatal("ListenAndServe:", err)
+  }
+}
 
-			fmt.Fprintf(w, "hello %s\n", req.URL)
-		})
+func loadBalancingReverseProxy(target1, target2 *url.URL) *httputil.ReverseProxy {
+  var targetNum = 1
 
-	log.Println("Starting server on", *addr)
-	if err := http.ListenAndServe(*addr, nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
-	}
+  director := func(req *http.Request) {
+    var target *url.URL
+    // Simple round robin between the two targets
+    if targetNum == 1 {
+      target = target1
+      targetNum = 2
+    } else {
+      target = target2
+      targetNum = 1
+    }
+
+    req.URL.Scheme = target.Scheme
+    req.URL.Host = target.Host
+    req.URL.Path, req.URL.RawPath = joinURLPath(target, req.URL)
+    // For simplicity, we don't handle RawQuery or the User-Agent header here:
+    // see the full code of NewSingleHostReverseProxy for an example of doing
+    // that.
+  }
+  return &httputil.ReverseProxy{Director: director}
 }
