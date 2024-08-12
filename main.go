@@ -23,13 +23,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		ID:   1,
 		Body: "Hello this is hello world",
 	}
-	postJson, err := json.Marshal(post)
-
-	if err != nil {
-		fmt.Println("Could not unmarshall the post")
-		return
-	}
 	fmt.Println("Sending Post...")
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(postJson)
+	json.NewEncoder(w).Encode(post)
 }
