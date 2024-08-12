@@ -1,29 +1,35 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 )
 
-type Post struct {
-	ID   int    `json:"id"`
-	Body string `json:"body"`
-}
-
 func main() {
-	http.HandleFunc("/hello", HandleRoot)
-	fmt.Println("Running server on http://localhost:3000")
-	log.Fatal(http.ListenAndServe(":3000", nil))
-}
+	addr := flag.String("addr", "127.0.0.1:8080", "listen address")
+	flag.Parse()
 
-func HandleRoot(w http.ResponseWriter, r *http.Request) {
-	var post Post = Post{
-		ID:   1,
-		Body: "Hello this is hello world",
+	http.HandleFunc("/",
+		func(w http.ResponseWriter, req *http.Request) {
+			var b strings.Builder
+
+			fmt.Fprintf(&b, "%v\t%v\t%v\tHost: %v\n", req.RemoteAddr, req.Method, req.URL, req.Host)
+			for name, headers := range req.Header {
+				for _, h := range headers {
+					fmt.Fprintf(&b, "%v: %v\n", name, h)
+				}
+			}
+			log.Println(b.String())
+
+			fmt.Fprintf(w, "hello %s\n", req.URL)
+		})
+
+	log.Println("Starting server on", *addr)
+	if err := http.ListenAndServe(*addr, nil); err != nil {
+		log.Fatal("ListenAndServe:", err)
 	}
-	fmt.Println("Sending Post...")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(post)
 }
