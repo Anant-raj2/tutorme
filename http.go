@@ -43,3 +43,58 @@ func (h *HTTP) Shutdown(ctx context.Context) error {
 	return nil
 }
 
+// NewService returns an instance of HTTP with all its dependencies set
+func NewService(cfg *Config, apis api.Server) (*HTTP, error) {
+	home, err := loadHomeTemplate(cfg.TemplatesBasePath)
+	if err != nil {
+		return nil, err
+	}
+
+	handlers := &Handlers{
+		apis: apis,
+		home: home,
+	}
+
+	router := webgo.NewRouter(
+		&webgo.Config{
+			Host:            cfg.Host,
+			Port:            strconv.Itoa(int(cfg.Port)),
+			ReadTimeout:     cfg.ReadTimeout,
+			WriteTimeout:    cfg.WriteTimeout,
+			ShutdownTimeout: cfg.WriteTimeout * 2,
+		},
+		handlers.routes()...,
+	)
+
+	if cfg.EnableAccessLog {
+		router.Use(accesslog.AccessLog)
+		router.UseOnSpecialHandlers(accesslog.AccessLog)
+	}
+	router.Use(panicRecoverer)
+
+	otelopts := []otelhttp.Option{
+		// in this app, /-/ prefixed routes are used for healthchecks, readiness checks etc.
+		otelhttp.WithFilter(func(req *http.Request) bool {
+			return !strings.HasPrefix(req.URL.Path, "/-/")
+		}),
+		// the span name formatter is used to reduce the cardinality of metrics generated
+		// when using URIs with variables in it
+		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+			wctx := webgo.Context(r)
+			if wctx == nil {
+				return r.URL.Path
+			}
+			return wctx.Route.Pattern
+		}),
+	}
+
+	apmMw := apm.NewHTTPMiddleware(otelopts...)
+	router.Use(func(w http.ResponseWriter, r *http.Request, hf http.HandlerFunc) {
+		apmMw(hf).ServeHTTP(w, r)
+	})
+
+	return &HTTP{
+		server:   router,
+		listener: fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+	}, nil
+}
