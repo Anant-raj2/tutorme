@@ -5,30 +5,26 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/julienschmidt/httprouter"
 )
 
 type Server struct {
-	Host         string
-	Port         string
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
+	Config
 }
 
-func CreateService() (*Server, error) {
+func CreateService(cfgs ...ServerConfig) (*Server, error) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, err
 	}
+	config := defaultConfig()
+	for _, cfg := range cfgs {
+		cfg(&config)
+	}
 	var srv *Server = &Server{
-		Host:         os.Getenv("HOST"),
-		Port:         os.Getenv("PORT"),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		Config: config,
 	}
 	return srv, nil
 }
