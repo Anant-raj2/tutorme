@@ -3,39 +3,54 @@ package server
 import (
 	"errors"
 	"log"
+	"net"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/julienschmidt/httprouter"
 )
 
-type Config struct {
+type Server struct {
 	Host         string
-	Port         uint16
+	Port         string
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 }
 
-type HTTP struct {
-	// Handler      http.Handler
-	// Addr         string
-	// ReadTimeout  time.Duration
-	// WriteTimeout time.Duration
-	*http.Server
+func CreateService() (*Server, error) {
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
+	var srv *Server = &Server{
+		Host:         os.Getenv("HOST"),
+		Port:         os.Getenv("PORT"),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	return srv, nil
 }
 
-func NewServer(cfg *Config) *http.Server {
+func (srv *Server) createHttpServer() *http.Server {
 	var mux *httprouter.Router = httprouter.New()
-	var listener string = cfg.Host
+	addRoutes(mux)
 	return &http.Server{
 		Handler:      mux,
-		Addr:         listener,
-		ReadTimeout:  cfg.ReadTimeout,
-		WriteTimeout: cfg.WriteTimeout,
+		Addr:         net.JoinHostPort(srv.Host, srv.Port),
+		ReadTimeout:  srv.ReadTimeout,
+		WriteTimeout: srv.WriteTimeout,
 	}
 }
 
-// func (srv *HTTP) Start() {
-//   err:=srv.ListenAndServe()
-//   if err != nil
-// }
+func (srv *Server) Start() error {
+	err := srv.createHttpServer().ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		log.Printf("server closed\n")
+	} else if err != nil {
+		log.Printf("error starting server: %s\n", err)
+		return err
+	}
+	return nil
+}

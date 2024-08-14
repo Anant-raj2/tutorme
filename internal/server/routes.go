@@ -1,6 +1,10 @@
 package server
 
+import (
+	"github.com/Anant-raj2/tutorme/internal/handler"
+	"github.com/julienschmidt/httprouter"
+)
 
-func (srv *HTTPServer) addRoutes(){
-  srv.mux.GET("/testport", handlers.TestPort)
+func addRoutes(mux *httprouter.Router) {
+	mux.GET("/data", handler.HelloWorld)
 }
