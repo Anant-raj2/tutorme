@@ -15,9 +15,7 @@ type Config struct {
 	WriteTimeout time.Duration
 }
 
-type ServerConfig func(*Config)
-
-func defaultConfig() Config {
+func DefaultConfig() Config {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Failed to load env")

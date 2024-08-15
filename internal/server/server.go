@@ -9,30 +9,40 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type Server struct {
-	http *http.Server
+type HTTP struct {
+	server *Router
 }
 
-func CreateService(cfg Config) *Server {
+type Router struct {
+	*http.Server
+	mux http.Handler
+}
+
+func createHandler(cfg Config) *Router {
 	var mux *httprouter.Router = httprouter.New()
-
 	addRoutes(mux)
-
 	var server *http.Server = &http.Server{
 		Handler:      mux,
 		Addr:         net.JoinHostPort(cfg.Host, cfg.Port),
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
 	}
+	return &Router{
+		server,
+		mux,
+	}
 
-	var srv *Server = &Server{
-		http: server,
+}
+
+func NewHttpServer(cfg Config) *HTTP {
+	var srv *HTTP = &HTTP{
+		server: createHandler(cfg),
 	}
 	return srv
 }
 
-func (srv *Server) Start() error {
-	err := srv.http.ListenAndServe()
+func (srv *HTTP) Start() error {
+	err := srv.server.ListenAndServe()
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Printf("server closed\n")
 	} else if err != nil {
