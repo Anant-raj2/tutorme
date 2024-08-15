@@ -1,16 +1,22 @@
 package server
 
 import (
-	"errors"
+	"context"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"sync"
+	"time"
 
+	"github.com/Anant-raj2/tutorme/internal/auth"
 	"github.com/julienschmidt/httprouter"
 )
 
 type HTTP struct {
-	server *Router
+	server    *Router
+	authStore *auth.UserStore
 }
 
 type Router struct {
@@ -34,24 +40,18 @@ func createHandler(cfg Config) *Router {
 
 }
 
-func NewHttpServer(cfg Config) *HTTP {
+func NewHttpServer(cfg Config, authStore *auth.UserStore) *HTTP {
 	var srv *HTTP = &HTTP{
 		server: createHandler(cfg),
+    authStore: authStore,
 	}
 	return srv
 }
 
-func (srv *HTTP) Start() error {
-	err := srv.server.ListenAndServe()
-	if errors.Is(err, http.ErrServerClosed) {
-		log.Printf("server closed\n")
-	} else if err != nil {
-		log.Printf("error starting server: %s\n", err)
-		return err
-	}
+func (srv *HTTP) Start(ctx context.Context) error {
 	go func() {
-		log.Printf("listening on %s\n", httpServer.Addr)
-		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Printf("listening on %s\n", srv.server.Addr)
+		if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
 		}
 	}()
@@ -64,7 +64,7 @@ func (srv *HTTP) Start() error {
 		shutdownCtx := context.Background()
 		shutdownCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
-		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		if err := srv.server.Shutdown(shutdownCtx); err != nil {
 			fmt.Fprintf(os.Stderr, "error shutting down http server: %s\n", err)
 		}
 	}()
