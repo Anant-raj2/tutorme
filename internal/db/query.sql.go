@@ -25,8 +25,12 @@ type CreateAuthorParams struct {
 	Bio  pgtype.Text
 }
 
-func (q *Queries) CreateAuthor(ctx context.Context, arg CreateAuthorParams) (Author, error) {
-	row := q.db.QueryRow(ctx, createAuthor, arg.Name, arg.Bio)
+func (q *Queries) CreateAuthor(ctx context.Context) (Author, error) {
+  author:=CreateAuthorParams{
+    Name: "Brian Kernighan",
+    Bio:  pgtype.Text{String: "Co-author of The C Programming Language and The Go Programming Language", Valid: true},
+  }
+	row := q.db.QueryRow(ctx, createAuthor, author.Name, author.Bio)
 	var i Author
 	err := row.Scan(&i.ID, &i.Name, &i.Bio)
 	return i, err
