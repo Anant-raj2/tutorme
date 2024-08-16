@@ -23,7 +23,7 @@ func main() {
 	defer conn.Close(ctx)
 	db := db.New(conn)
 
-	insertedAuthor, err := db.CreateAuthor(ctx)
+	insertedAuthor, err := db.CreateTutor(ctx)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not insert author: %s", err)
 	}

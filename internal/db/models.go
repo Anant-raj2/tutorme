@@ -8,8 +8,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Author struct {
-	ID   int64
-	Name string
-	Bio  pgtype.Text
+type Tutor struct {
+	UserID     pgtype.UUID
+	Name       string
+	GradeLevel int32
+	Role       string
+	Gender     string
+	Subject    string
 }

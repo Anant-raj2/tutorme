@@ -7,96 +7,49 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createAuthor = `-- name: CreateAuthor :one
-INSERT INTO authors (
-  name, bio
+const createTutor = `-- name: CreateTutor :one
+INSERT INTO tutors (
+  user_id, name, grade_level, role, gender, subject
 ) VALUES (
-  $1, $2
+  gen_random_uuid(), $1, $2, $3, $4, $5
 )
-RETURNING id, name, bio
+RETURNING user_id, name, grade_level, role, gender, subject
 `
 
-type CreateAuthorParams struct {
-	Name string
-	Bio  pgtype.Text
+type CreateTutorParams struct {
+	Name       string
+	GradeLevel int32
+	Role       string
+	Gender     string
+	Subject    string
 }
 
-func (q *Queries) CreateAuthor(ctx context.Context) (Author, error) {
-  author:=CreateAuthorParams{
-    Name: "Brian Kernighan",
-    Bio:  pgtype.Text{String: "Co-author of The C Programming Language and The Go Programming Language", Valid: true},
+func (q *Queries) CreateTutor(ctx context.Context) (Tutor, error) {
+   arg := CreateTutorParams {
+    Name: "Anant Raj",
+    GradeLevel: 11,
+    Role: "admin",
+    Gender: "male",
+    Subject: "",
   }
-	row := q.db.QueryRow(ctx, createAuthor, author.Name, author.Bio)
-	var i Author
-	err := row.Scan(&i.ID, &i.Name, &i.Bio)
+
+	row := q.db.QueryRow(ctx, createTutor,
+		arg.Name,
+		arg.GradeLevel,
+		arg.Role,
+		arg.Gender,
+		arg.Subject,
+	)
+	var i Tutor
+	err := row.Scan(
+		&i.UserID,
+		&i.Name,
+		&i.GradeLevel,
+		&i.Role,
+		&i.Gender,
+		&i.Subject,
+	)
 	return i, err
-}
-
-const deleteAuthor = `-- name: DeleteAuthor :exec
-DELETE FROM authors
-WHERE id = $1
-`
-
-func (q *Queries) DeleteAuthor(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteAuthor, id)
-	return err
-}
-
-const getAuthor = `-- name: GetAuthor :one
-SELECT id, name, bio FROM authors
-WHERE id = $1 LIMIT 1
-`
-
-func (q *Queries) GetAuthor(ctx context.Context, id int64) (Author, error) {
-	row := q.db.QueryRow(ctx, getAuthor, id)
-	var i Author
-	err := row.Scan(&i.ID, &i.Name, &i.Bio)
-	return i, err
-}
-
-const listAuthors = `-- name: ListAuthors :many
-SELECT id, name, bio FROM authors
-ORDER BY name
-`
-
-func (q *Queries) ListAuthors(ctx context.Context) ([]Author, error) {
-	rows, err := q.db.Query(ctx, listAuthors)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Author
-	for rows.Next() {
-		var i Author
-		if err := rows.Scan(&i.ID, &i.Name, &i.Bio); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const updateAuthor = `-- name: UpdateAuthor :exec
-UPDATE authors
-  set name = $2,
-  bio = $3
-WHERE id = $1
-`
-
-type UpdateAuthorParams struct {
-	ID   int64
-	Name string
-	Bio  pgtype.Text
-}
-
-func (q *Queries) UpdateAuthor(ctx context.Context, arg UpdateAuthorParams) error {
-	_, err := q.db.Exec(ctx, updateAuthor, arg.ID, arg.Name, arg.Bio)
-	return err
 }
