@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Anant-raj2/tutorme/internal/auth"
 	"github.com/Anant-raj2/tutorme/internal/db"
 	"github.com/Anant-raj2/tutorme/internal/server"
 	"github.com/jackc/pgx/v5"
@@ -28,13 +29,12 @@ func main() {
 
 	queries := db.New(conn)
 
-	var userHandler *server.AuthStore = server.New(queries)
+	var userHandler *auth.AuthStore = auth.New(queries)
 
 	var handlerConfig server.Config = server.Config{
 		Host: os.Getenv("HOST"),
 		Port: os.Getenv("PORT"),
 	}
-
 	var httpServer *server.HTTP = server.NewHttpServer(handlerConfig, userHandler)
 	httpServer.Start(ctx)
 }

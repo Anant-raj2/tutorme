@@ -1,13 +1,13 @@
-package server
+package auth
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/Anant-raj2/tutorme/internal/db"
+	"github.com/Anant-raj2/tutorme/pkg/util"
 	"github.com/Anant-raj2/tutorme/web/templa"
 	"github.com/julienschmidt/httprouter"
 )
@@ -22,14 +22,14 @@ func New(queries *db.Queries) *AuthStore {
 	}
 }
 
-func (handler *AuthStore) renderSignup(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (handler *AuthStore) RenderSignup(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	component := templa.Hello("Anant-raj2")
 	component.Render(context.Background(), w)
 }
 
 func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	ctx := context.Background()
-	var user TutorParams
+	var user util.TutorParams
 
 	req, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -42,7 +42,6 @@ func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ 
 	if err != nil {
 		return err
 	}
-	fmt.Println(tutor)
 
 	json.NewEncoder(w).Encode(tutor)
 	return nil
