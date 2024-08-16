@@ -11,7 +11,7 @@ import (
 type Tutor struct {
 	UserID     pgtype.UUID
 	Name       string
-	Email      pgtype.Text
+	Email      string
 	GradeLevel int32
 	Role       string
 	Gender     string

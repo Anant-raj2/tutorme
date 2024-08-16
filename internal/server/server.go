@@ -43,11 +43,11 @@ func NewHttpServer(cfg Config, queries *db.Queries) *HTTP {
 		server:  createHandler(cfg),
 		queries: queries,
 	}
+	srv.addRoutes(srv.server.mux)
 	return srv
 }
 
 func (srv *HTTP) Start(ctx context.Context) error {
-	srv.addRoutes(srv.server.mux)
 	go func() {
 		log.Printf("listening on %s\n", srv.server.Addr)
 		if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

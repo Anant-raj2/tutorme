@@ -11,15 +11,16 @@ import (
 
 const createTutor = `-- name: CreateTutor :one
 INSERT INTO tutors (
-  user_id, name, grade_level, role, gender, subject
+  user_id, name,email, grade_level, role, gender, subject
 ) VALUES (
-  gen_random_uuid(), $1, $2, $3, $4, $5
+  gen_random_uuid(), $1, $2, $3, $4, $5, $6
 )
 RETURNING user_id, name, email, grade_level, role, gender, subject
 `
 
 type CreateTutorParams struct {
 	Name       string
+	Email      string
 	GradeLevel int32
 	Role       string
 	Gender     string
@@ -29,6 +30,7 @@ type CreateTutorParams struct {
 func (q *Queries) CreateTutor(ctx context.Context, arg CreateTutorParams) (Tutor, error) {
 	row := q.db.QueryRow(ctx, createTutor,
 		arg.Name,
+		arg.Email,
 		arg.GradeLevel,
 		arg.Role,
 		arg.Gender,
