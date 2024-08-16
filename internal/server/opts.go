@@ -1,11 +1,7 @@
 package server
 
 import (
-	"log"
-	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -13,18 +9,4 @@ type Config struct {
 	Port         string
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
-}
-
-func DefaultConfig() Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Failed to load env")
-		os.Exit(1)
-	}
-	return Config{
-		Host:         os.Getenv("HOST"),
-		Port:         os.Getenv("PORT"),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
 }

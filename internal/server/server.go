@@ -42,8 +42,8 @@ func createHandler(cfg Config) *Router {
 
 func NewHttpServer(cfg Config, authStore *auth.UserStore) *HTTP {
 	var srv *HTTP = &HTTP{
-		server: createHandler(cfg),
-    authStore: authStore,
+		server:    createHandler(cfg),
+		authStore: authStore,
 	}
 	return srv
 }

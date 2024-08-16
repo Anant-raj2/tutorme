@@ -18,7 +18,7 @@ INSERT INTO tutors (
 RETURNING user_id, name, grade_level, role, gender, subject
 `
 
-type CreateTutorParams struct {
+type TutorParams struct {
 	Name       string
 	GradeLevel int32
 	Role       string
@@ -26,15 +26,7 @@ type CreateTutorParams struct {
 	Subject    string
 }
 
-func (q *Queries) CreateTutor(ctx context.Context) (Tutor, error) {
-   arg := CreateTutorParams {
-    Name: "Anant Raj",
-    GradeLevel: 11,
-    Role: "admin",
-    Gender: "male",
-    Subject: "",
-  }
-
+func (q *Queries) CreateTutor(ctx context.Context, arg TutorParams) (Tutor, error) {
 	row := q.db.QueryRow(ctx, createTutor,
 		arg.Name,
 		arg.GradeLevel,
