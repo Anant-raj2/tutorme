@@ -21,12 +21,11 @@ type HTTP struct {
 
 type Router struct {
 	*http.Server
-	mux http.Handler
+	mux *httprouter.Router
 }
 
 func createHandler(cfg Config) *Router {
 	var mux *httprouter.Router = httprouter.New()
-	// addRoutes(mux)
 	var server *http.Server = &http.Server{
 		Handler:      mux,
 		Addr:         net.JoinHostPort(cfg.Host, cfg.Port),
@@ -48,7 +47,7 @@ func NewHttpServer(cfg Config, queries *db.Queries) *HTTP {
 }
 
 func (srv *HTTP) Start(ctx context.Context) error {
-  srv.addRoutes(srv.server.mux)
+	srv.addRoutes(srv.server.mux)
 	go func() {
 		log.Printf("listening on %s\n", srv.server.Addr)
 		if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

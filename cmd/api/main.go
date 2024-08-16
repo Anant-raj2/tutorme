@@ -29,8 +29,8 @@ func main() {
 	queries := db.New(conn)
 
 	var handlerConfig server.Config = server.Config{
-		Host: os.Getenv("Host"),
-		Port: os.Getenv("Port"),
+		Host: os.Getenv("HOST"),
+		Port: os.Getenv("PORT"),
 	}
 
 	var httpServer *server.HTTP = server.NewHttpServer(handlerConfig, queries)
