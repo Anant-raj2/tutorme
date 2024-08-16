@@ -28,11 +28,13 @@ func main() {
 
 	queries := db.New(conn)
 
+	var userHandler *server.AuthStore = server.New(queries)
+
 	var handlerConfig server.Config = server.Config{
 		Host: os.Getenv("HOST"),
 		Port: os.Getenv("PORT"),
 	}
 
-	var httpServer *server.HTTP = server.NewHttpServer(handlerConfig, queries)
+	var httpServer *server.HTTP = server.NewHttpServer(handlerConfig, userHandler)
 	httpServer.Start(ctx)
 }
