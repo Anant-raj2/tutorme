@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Anant-raj2/tutorme/internal/auth"
+	"github.com/Anant-raj2/tutorme/internal/db"
 	"github.com/julienschmidt/httprouter"
 )
 
 type HTTP struct {
-	server    *Router
-	authStore *auth.UserStore
+	server  *Router
+	queries *db.Queries
 }
 
 type Router struct {
@@ -26,7 +26,7 @@ type Router struct {
 
 func createHandler(cfg Config) *Router {
 	var mux *httprouter.Router = httprouter.New()
-	addRoutes(mux)
+	// addRoutes(mux)
 	var server *http.Server = &http.Server{
 		Handler:      mux,
 		Addr:         net.JoinHostPort(cfg.Host, cfg.Port),
@@ -37,18 +37,18 @@ func createHandler(cfg Config) *Router {
 		server,
 		mux,
 	}
-
 }
 
-func NewHttpServer(cfg Config, authStore *auth.UserStore) *HTTP {
+func NewHttpServer(cfg Config, queries *db.Queries) *HTTP {
 	var srv *HTTP = &HTTP{
-		server:    createHandler(cfg),
-		authStore: authStore,
+		server:  createHandler(cfg),
+		queries: queries,
 	}
 	return srv
 }
 
 func (srv *HTTP) Start(ctx context.Context) error {
+  srv.addRoutes(srv.server.mux)
 	go func() {
 		log.Printf("listening on %s\n", srv.server.Addr)
 		if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

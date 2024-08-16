@@ -1,15 +1,22 @@
 package server
 
 import (
-	"encoding/json"
+	// "context"
+	// "encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-func addRoutes(mux *httprouter.Router) {
+func (srv *HTTP) addRoutes(mux *httprouter.Router) {
 	//Authentication Endpoints
-	mux.GET("/create-account", func(f http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		json.NewEncoder(f).Encode("Hello World")
-	})
+	mux.POST("/create-account", ErrorWrapper(srv.handleCreateAccount))
+}
+
+func (srv *HTTP) handleCreateAccount(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
+	// ctx := context.Background()
+	fmt.Println(r.Body)
+	// srv.queries.CreateTutor(ctx, arg db.TutorParams)
+	return nil
 }
