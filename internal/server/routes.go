@@ -19,13 +19,27 @@ func (srv *HTTP) addRoutes(mux *httprouter.Router) {
 	})
 }
 
-type Sentence struct {
-	Sentence string `json:"sentence"`
+type TutorParams struct {
+	Name       string `json:"name"`
+	GradeLevel int32  `json:"grade_level"`
+	Role       string `json:"role"`
+	Gender     string `json:"gender"`
+	Subject    string `json:"subject"`
+}
+
+func (params *TutorParams) OTD() *db.CreateTutorParams {
+	return &db.CreateTutorParams{
+		Name:       params.Name,
+		GradeLevel: params.GradeLevel,
+		Role:       params.Role,
+		Gender:     params.Gender,
+		Subject:    params.Subject,
+	}
 }
 
 func (srv *HTTP) handleCreateAccount(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	ctx := context.Background()
-	user := db.TutorParams{}
+	var user TutorParams
 
 	req, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -34,11 +48,11 @@ func (srv *HTTP) handleCreateAccount(w http.ResponseWriter, r *http.Request, _ h
 
 	json.Unmarshal(req, &user)
 
-	tutor, err := srv.queries.CreateTutor(ctx, user)
+	tutor, err := srv.queries.CreateTutor(ctx, *user.OTD())
 	if err != nil {
 		return err
 	}
-  fmt.Printf("%s", tutor)
-	json.NewEncoder(w).Encode("hello")
+	fmt.Println(tutor)
+	json.NewEncoder(w).Encode(tutor)
 	return nil
 }

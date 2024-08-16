@@ -15,23 +15,22 @@ INSERT INTO tutors (
 ) VALUES (
   gen_random_uuid(), $1, $2, $3, $4, $5
 )
-RETURNING user_id, name, grade_level, role, gender, subject
+RETURNING user_id, name, email, grade_level, role, gender, subject
 `
 
-type TutorParams struct {
-  Name       string `json:"name"`
-	GradeLevel int32  `json:"grade_level"`
-	Role       string `json:"role"`
-	Gender     string `json:"gender"`
-	Subject    string `json:"subject"`
+type CreateTutorParams struct {
+	Name       string
+	GradeLevel int32
+	Role       string
+	Gender     string
+	Subject    string
 }
 
-func (q *Queries) CreateTutor(ctx context.Context, arg TutorParams) (Tutor, error) {
+func (q *Queries) CreateTutor(ctx context.Context, arg CreateTutorParams) (Tutor, error) {
 	row := q.db.QueryRow(ctx, createTutor,
 		arg.Name,
 		arg.GradeLevel,
 		arg.Role,
-
 		arg.Gender,
 		arg.Subject,
 	)
@@ -39,6 +38,7 @@ func (q *Queries) CreateTutor(ctx context.Context, arg TutorParams) (Tutor, erro
 	err := row.Scan(
 		&i.UserID,
 		&i.Name,
+		&i.Email,
 		&i.GradeLevel,
 		&i.Role,
 		&i.Gender,
