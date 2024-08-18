@@ -26,20 +26,7 @@ func Hello(name string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div><h1>Hello, ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templa/signup.templ`, Line: 5, Col: 19}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"Tutorme Signup Page\"><title>Tutorme - Login</title><!-- Link to external stylesheets --><script src=\"https://unpkg.com/htmx.org@2.0.2\" integrity=\"sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ\" crossorigin=\"anonymous\"></script><!-- Favicon --><link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\"></head><body><h3>Signup Form</h3><form hx-post=\"/create-account\"><div hx-target=\"this\" hx-swap=\"outerHTML\"><label>Email Address</label> <input name=\"email\" hx-indicator=\"#ind\"></div><div class=\"form-group\"><label>Name</label> <input type=\"text\" class=\"form-control\" name=\"name\"></div><div class=\"form-group\"><label>Grade Level</label> <input type=\"number\" class=\"form-control\" name=\"grade_level\"></div><div class=\"form-group\"><label>Role</label> <input type=\"text\" class=\"form-control\" name=\"role\"></div><div class=\"form-group\"><label>Gender</label> <input type=\"text\" class=\"form-control\" name=\"gender\"></div><div class=\"form-group\"><label>Subject</label> <input type=\"text\" class=\"form-control\" name=\"subject\"></div><button hx-post=\"/create-account\" hx-trigger=\"click\" hx-swap=\"outerHTML\">Click Me!</button></form></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

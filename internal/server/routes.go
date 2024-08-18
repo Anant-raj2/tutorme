@@ -7,6 +7,6 @@ import (
 
 func (srv *HTTP) addRoutes(mux *httprouter.Router) {
 	//Authentication Endpoints
-	mux.GET("/signup", srv.authStore.RenderSignup)
+	mux.GET("/signup", logger.LogHttp(srv.authStore.RenderSignup))
 	mux.POST("/create-account", logger.LogHttp(ErrorWrapper(srv.authStore.CreateTutor)))
 }

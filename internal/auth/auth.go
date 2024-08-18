@@ -3,8 +3,10 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/Anant-raj2/tutorme/internal/db"
 	"github.com/Anant-raj2/tutorme/pkg/util"
@@ -38,10 +40,16 @@ func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ 
 
 	json.Unmarshal(req, &user)
 
+	start := time.Now()
+
 	tutor, err := handler.queries.CreateTutor(ctx, *user.OTD())
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(time.Since(start).Milliseconds())
+
+	fmt.Println(user)
 
 	json.NewEncoder(w).Encode(tutor)
 	return nil
