@@ -3,10 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"time"
 
 	"github.com/Anant-raj2/tutorme/internal/db"
 	"github.com/Anant-raj2/tutorme/pkg/util"
@@ -31,25 +28,20 @@ func (handler *AuthStore) RenderSignup(w http.ResponseWriter, _ *http.Request, _
 
 func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	ctx := context.Background()
-	var user util.TutorParams
-
-	req, err := io.ReadAll(r.Body)
-	if err != nil {
-		return err
+	r.ParseForm()
+	var user util.TutorParams = util.TutorParams{
+		Email:      r.FormValue("email"),
+		Name:       r.FormValue("name"),
+		Gender:     r.FormValue("gender"),
+		GradeLevel: 11,
+		Role:       r.FormValue("role"),
+		Subject:    r.FormValue("subject"),
 	}
-
-	json.Unmarshal(req, &user)
-
-	start := time.Now()
 
 	tutor, err := handler.queries.CreateTutor(ctx, *user.OTD())
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(time.Since(start).Milliseconds())
-
-	fmt.Println(user)
 
 	json.NewEncoder(w).Encode(tutor)
 	return nil
