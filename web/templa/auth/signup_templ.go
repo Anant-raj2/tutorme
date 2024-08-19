@@ -8,7 +8,7 @@ package auth
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func Hello(name string) templ.Component {
+func SignupForm() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -26,7 +26,7 @@ func Hello(name string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\"><title>TutorMe - Signup</title><script src=\"https://unpkg.com/htmx.org@2.0.2\" integrity=\"sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ\" crossorigin=\"anonymous\"></script></head><body><h3>Signup Form</h3><form hx-post=\"/create-account\"><label>Email Address</label> <input required name=\"email\" id=\"email\"> <label>Name</label> <input type=\"text\" required id=\"name\" name=\"name\"> <label>Grade Level</label> <input type=\"number\" required id=\"grade_level\" name=\"grade_level\"> <label>Role</label> <input type=\"text\" required name=\"role\" id=\"role\"> <label>Gender</label> <input type=\"text\" required id=\"gender\" name=\"gender\"> <label>Subject</label> <input type=\"text\" required id=\"subject\" name=\"subject\"> <button type=\"submit\">Click Me!</button></form></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\"><title>TutorMe - Signup</title><link rel=\"stylesheet\" href=\"/web/styles/main.css\"><script src=\"https://unpkg.com/htmx.org@2.0.2\" integrity=\"sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ\" crossorigin=\"anonymous\"></script></head><body><h3>Signup Form</h3><form hx-post=\"/create-account\"><label>Email Address</label> <input required name=\"email\" id=\"email\"> <label>Name</label> <input className=\"w-[500px]\" type=\"text\" required id=\"name\" name=\"name\"> <label>Grade Level</label> <input type=\"number\" required id=\"grade_level\" name=\"grade_level\"> <label>Gender</label> <input type=\"text\" required id=\"gender\" name=\"gender\"> <label>Subject</label> <input type=\"text\" required id=\"subject\" name=\"subject\"> <button type=\"submit\">Register</button></form></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

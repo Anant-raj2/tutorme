@@ -22,22 +22,21 @@ func New(queries *db.Queries) *AuthStore {
 }
 
 func (handler *AuthStore) RenderSignup(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	component := auth.SignupForm("Anant-raj2")
+	component := auth.SignupForm()
 	component.Render(context.Background(), w)
 }
 
 func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	ctx := context.Background()
 	r.ParseForm()
-	grade_level, err := strconv.Atoi(r.FormValue("grade_level"))
+	grade_level, err := strconv.Atoi(r.PostFormValue("grade_level"))
 
 	var tutorConfig db.CreateTutorParams = db.CreateTutorParams{
-		Email:      r.FormValue("email"),
-		Name:       r.FormValue("name"),
-		Gender:     r.FormValue("gender"),
+		Email:      r.PostFormValue("email"),
+		Name:       r.PostFormValue("name"),
+		Gender:     r.PostFormValue("gender"),
 		GradeLevel: int32(grade_level),
-		Role:       r.FormValue("role"),
-		Subject:    r.FormValue("subject"),
+		Subject:    r.PostFormValue("subject"),
 	}
 
 	tutor, err := handler.queries.CreateTutor(ctx, tutorConfig)
@@ -46,7 +45,7 @@ func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ 
 	}
 
 	fmt.Println(tutor)
-	component := auth.SignupForm("Anant-raj2")
+	component := auth.SignupForm()
 	component.Render(context.Background(), w)
 	return nil
 }

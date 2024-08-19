@@ -11,18 +11,17 @@ import (
 
 const createTutor = `-- name: CreateTutor :one
 INSERT INTO tutors (
-  user_id, name,email, grade_level, role, gender, subject
+  user_id, name,email, grade_level, gender, subject
 ) VALUES (
-  gen_random_uuid(), $1, $2, $3, $4, $5, $6
+  gen_random_uuid(), $1, $2, $3, $4, $5
 )
-RETURNING user_id, name, email, grade_level, role, gender, subject
+RETURNING user_id, name, email, grade_level, gender, subject
 `
 
 type CreateTutorParams struct {
 	Name       string
 	Email      string
 	GradeLevel int32
-	Role       string
 	Gender     string
 	Subject    string
 }
@@ -32,7 +31,6 @@ func (q *Queries) CreateTutor(ctx context.Context, arg CreateTutorParams) (Tutor
 		arg.Name,
 		arg.Email,
 		arg.GradeLevel,
-		arg.Role,
 		arg.Gender,
 		arg.Subject,
 	)
@@ -42,7 +40,6 @@ func (q *Queries) CreateTutor(ctx context.Context, arg CreateTutorParams) (Tutor
 		&i.Name,
 		&i.Email,
 		&i.GradeLevel,
-		&i.Role,
 		&i.Gender,
 		&i.Subject,
 	)

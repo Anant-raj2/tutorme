@@ -12,7 +12,6 @@ type TutorParams struct {
 	Name       string `json:"name"`
 	Email      string `json:"email"`
 	GradeLevel int32  `json:"grade_level"`
-	Role       string `json:"role"`
 	Gender     string `json:"gender"`
 	Subject    string `json:"subject"`
 }
@@ -22,7 +21,6 @@ func (params *TutorParams) OTD() *db.CreateTutorParams {
 		Name:       params.Name,
 		Email:      params.Email,
 		GradeLevel: params.GradeLevel,
-		Role:       params.Role,
 		Gender:     params.Gender,
 		Subject:    params.Subject,
 	}

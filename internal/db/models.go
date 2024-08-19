@@ -13,7 +13,6 @@ type Tutor struct {
 	Name       string
 	Email      string
 	GradeLevel int32
-	Role       string
 	Gender     string
 	Subject    string
 }
