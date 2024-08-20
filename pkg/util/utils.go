@@ -42,3 +42,33 @@ func decode[T any](r *http.Request) (T, error) {
 	}
 	return v, nil
 }
+
+func (list *LinkedList) findNodeAt(index int) *Node {
+ var count int = 0
+ var current *Node = list.head
+
+ for current != nil {
+  count++
+  current = current.next
+ }
+
+ if index <= 0 || index > count {
+  return nil
+ }
+
+ current = list.head
+ for count = 1; count < index; count++ {
+  current = current.next
+ }
+ return current
+}
+
+
+func (list *LinkedList) print() {
+ var current *Node = list.head
+ for current != nil {
+  fmt.Printf("%d -> ", current.data)
+  current = current.next
+ }
+ fmt.Println()
+}

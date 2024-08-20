@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Anant-raj2/tutorme/internal/auth"
+	"github.com/Anant-raj2/tutorme/internal/tutor"
 	"github.com/julienschmidt/httprouter"
 )
 
 type HTTP struct {
 	server    *Router
-	authStore *auth.AuthStore
+	authStore *tutor.Store
 }
 
 type Router struct {
@@ -38,7 +38,7 @@ func createHandler(cfg Config) *Router {
 	}
 }
 
-func NewHttpServer(cfg Config, userHandler *auth.AuthStore) *HTTP {
+func NewHttpServer(cfg Config, userHandler *tutor.Store) *HTTP {
 	var srv *HTTP = &HTTP{
 		server:    createHandler(cfg),
 		authStore: userHandler,

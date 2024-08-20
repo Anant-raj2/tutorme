@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Anant-raj2/tutorme/internal/auth"
 	"github.com/Anant-raj2/tutorme/internal/db"
 	"github.com/Anant-raj2/tutorme/internal/server"
+	"github.com/Anant-raj2/tutorme/internal/tutor"
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 )
@@ -30,7 +30,7 @@ func main() {
 
 	queries := db.New(conn)
 
-	var userHandler *auth.AuthStore = auth.New(queries)
+	var userHandler *tutor.Store = tutor.New(queries)
 
 	var handlerConfig server.Config = server.Config{
 		Host: system.Host,

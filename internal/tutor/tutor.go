@@ -1,32 +1,32 @@
-package auth
+package tutor
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/Anant-raj2/tutorme/internal/db"
 	"github.com/Anant-raj2/tutorme/web/templa/auth"
+	"github.com/Anant-raj2/tutorme/web/templa/component"
 	"github.com/julienschmidt/httprouter"
 )
 
-type AuthStore struct {
+type Store struct {
 	queries *db.Queries
 }
 
-func New(queries *db.Queries) *AuthStore {
-	return &AuthStore{
+func New(queries *db.Queries) *Store {
+	return &Store{
 		queries: queries,
 	}
 }
 
-func (handler *AuthStore) RenderSignup(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func (handler *Store) RenderSignup(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	component := auth.SignupForm()
 	component.Render(context.Background(), w)
 }
 
-func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
+func (handler *Store) CreateTutor(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	ctx := context.Background()
 	r.ParseForm()
 	grade_level, err := strconv.Atoi(r.PostFormValue("grade_level"))
@@ -43,9 +43,9 @@ func (handler *AuthStore) CreateTutor(w http.ResponseWriter, r *http.Request, _ 
 	if err != nil {
 		return err
 	}
+	_ = tutor
 
-	fmt.Println(tutor)
-	component := auth.SignupForm()
-	component.Render(context.Background(), w)
+	checkmark := component.Checkmark()
+	checkmark.Render(context.Background(), w)
 	return nil
 }
