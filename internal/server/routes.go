@@ -15,6 +15,7 @@ func (srv *HTTP) addRoutes(mux *httprouter.Router) {
 		component := home.HomeLayout()
 		component.Render(context.Background(), w)
 	}))
+
 	//Authentication Endpoints
 	mux.GET("/signup", logger.LogHttp(srv.authStore.RenderSignup))
 	mux.POST("/create-account", logger.LogHttp(ErrorWrapper(srv.authStore.CreateTutor)))
