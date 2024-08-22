@@ -45,23 +45,6 @@ type System struct {
 	Port string
 	Db   string
 }
-	r := gin.Default()
-
-	public := r.Group("/api")
-	{
-		public.POST("/register", register)
-		public.POST("/login", login)
-	}
-
-	protected := r.Group("/api")
-	protected.Use(authMiddleware())
-	{
-		protected.GET("/profile", getProfile)
-		protected.PUT("/profile", updateProfile)
-		protected.GET("/tutors", getTutors)
-	}
-
-	r.Run(":8080")
 
 func SetupEnv() (*System, error) {
 	err := godotenv.Load()

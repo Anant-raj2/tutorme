@@ -16,7 +16,11 @@ func (srv *HTTP) addRoutes(mux *httprouter.Router) {
 		component.Render(context.Background(), w)
 	}))
 
-	//Authentication Endpoints
-	mux.GET("/signup", logger.LogHttp(srv.authStore.RenderSignup))
-	mux.POST("/create-account", logger.LogHttp(ErrorWrapper(srv.authStore.CreateTutor)))
+	//Tutor Endpoints
+	mux.GET("/create-tutor", logger.LogHttp(srv.authStore.RenderSignup))
+	mux.POST("/add-tutor", logger.LogHttp(ErrorWrapper(srv.authStore.CreateTutor)))
+
+	//Tutor Endpoints
+	mux.GET("/create-tutor", logger.LogHttp(srv.authStore.RenderSignup))
+	mux.POST("/add-tutor", logger.LogHttp(ErrorWrapper(srv.authStore.CreateTutor)))
 }
