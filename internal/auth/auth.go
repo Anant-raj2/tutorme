@@ -28,6 +28,21 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+func main() {
+	r := gin.Default()
+
+	r.POST("/register", register)
+	r.POST("/login", login)
+
+	authorized := r.Group("/")
+	authorized.Use(authMiddleware())
+	{
+		authorized.GET("/profile", profile)
+	}
+
+	r.Run(":8080")
+}
+
 func register(c *gin.Context) {
 	var user User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -46,3 +61,24 @@ func register(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
+
+func login(c *gin.Context) {
+	var user User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	storedUser, exists := users[user.Username]
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(user.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
