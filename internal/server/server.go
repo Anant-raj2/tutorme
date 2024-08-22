@@ -10,13 +10,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Anant-raj2/tutorme/internal/auth"
 	"github.com/Anant-raj2/tutorme/internal/tutor"
 	"github.com/julienschmidt/httprouter"
 )
 
 type HTTP struct {
-	server    *Router
-	authStore *tutor.Store
+	server       *Router
+	tutorHandler *tutor.Handler
+	authHandler  *auth.Handler
 }
 
 type Router struct {
@@ -38,10 +40,11 @@ func createHandler(cfg Config) *Router {
 	}
 }
 
-func NewHttpServer(cfg Config, userHandler *tutor.Store) *HTTP {
+func NewHttpServer(cfg Config, tutorHandler *tutor.Handler, authHandler *auth.Handler) *HTTP {
 	var srv *HTTP = &HTTP{
-		server:    createHandler(cfg),
-		authStore: userHandler,
+		server:       createHandler(cfg),
+		tutorHandler: tutorHandler,
+		authHandler:  authHandler,
 	}
 	srv.addRoutes(srv.server.mux)
 	return srv

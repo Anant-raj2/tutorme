@@ -1,65 +1,55 @@
 package auth
 
 templ TutorSignup() {
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>TutorMe - Signup</title>
-  <link rel="stylesheet" href="/web/styles/main.css" />
-  <script src="https://unpkg.com/htmx.org@2.0.2"
-    integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
-    crossorigin="anonymous"></script>
-</head>
-
-<body>
-  <h3>Signup Form</h3>
-  <form hx-post="/create-account">
-    <label>Email Address</label>
-    <input required name="email" id="email" />
-    <label>Name</label>
-    <input className="w-[500px]" type="text" required id="name" name="name" />
-    <label>Grade Level</label>
-    <input type="number" required id="grade_level" name="grade_level" />
-    <label>Gender</label>
-    <input type="text" required id="gender" name="gender" />
-    <label>Subject</label>
-    <input type="text" required id="subject" name="subject" />
-    <button type="submit">
-      Register
-    </button>
-  </form>
-</body>
-
-</html>
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+			<title>TutorMe - Signup</title>
+			<link rel="stylesheet" href="/web/styles/main.css"/>
+			<script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<h3>Signup Form</h3>
+			<form hx-post="/create/tutor">
+				<label>Email Address</label>
+				<input required name="email" id="email"/>
+				<label>Name</label>
+				<input className="w-[500px]" type="text" required id="name" name="name"/>
+				<label>Grade Level</label>
+				<input type="number" required id="grade_level" name="grade_level"/>
+				<label>Gender</label>
+				<input type="text" required id="gender" name="gender"/>
+				<label>Subject</label>
+				<input type="text" required id="subject" name="subject"/>
+				<button type="submit">
+					Register
+				</button>
+			</form>
+		</body>
+	</html>
 }
 
 templ Register() {
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>TutorMe - Signup</title>
-  <link rel="stylesheet" href="/web/styles/main.css" />
-  <script src="https://unpkg.com/htmx.org@2.0.2"
-    integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
-    crossorigin="anonymous"></script>
-</head>
-
-<body>
-  <h3>Signup Form</h3>
-  <form hx-post="/create-account">
-    <button type="submit">
-      Register
-    </button>
-  </form>
-</body>
-
-</html>
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+			<title>TutorMe - Signup</title>
+			<link rel="stylesheet" href="/web/styles/main.css"/>
+			<script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<h3>Signup Form</h3>
+			<form hx-post="/create/account">
+				<button type="submit">
+					Register
+				</button>
+			</form>
+		</body>
+	</html>
 }

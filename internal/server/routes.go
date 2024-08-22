@@ -17,10 +17,10 @@ func (srv *HTTP) addRoutes(mux *httprouter.Router) {
 	}))
 
 	//Tutor Endpoints
-	mux.GET("/create-tutor", logger.LogHttp(srv.authStore.RenderSignup))
-	mux.POST("/add-tutor", logger.LogHttp(ErrorWrapper(srv.authStore.CreateTutor)))
+	mux.GET("/register", logger.LogHttp(srv.authHandler.RenderRegister))
+	mux.POST("/create/account", logger.LogHttp(ErrorWrapper(srv.authHandler.Register)))
 
 	//Tutor Endpoints
-	mux.GET("/create-tutor", logger.LogHttp(srv.authStore.RenderSignup))
-	mux.POST("/add-tutor", logger.LogHttp(ErrorWrapper(srv.authStore.CreateTutor)))
+	mux.GET("/create-tutor", logger.LogHttp(srv.tutorHandler.RenderTutor))
+	mux.POST("/create/tutor", logger.LogHttp(ErrorWrapper(srv.tutorHandler.CreateTutor)))
 }

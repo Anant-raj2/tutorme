@@ -11,22 +11,22 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type Store struct {
+type Handler struct {
 	queries *db.Queries
 }
 
-func New(queries *db.Queries) *Store {
-	return &Store{
+func New(queries *db.Queries) *Handler {
+	return &Handler{
 		queries: queries,
 	}
 }
 
-func (handler *Store) RenderSignup(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+func (handler *Handler) RenderTutor(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 	component := auth.SignupForm()
 	component.Render(context.Background(), w)
 }
 
-func (handler *Store) CreateTutor(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
+func (handler *Handler) CreateTutor(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
 	ctx := context.Background()
 	r.ParseForm()
 	grade_level, err := strconv.Atoi(r.PostFormValue("grade_level"))
