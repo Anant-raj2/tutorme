@@ -22,7 +22,7 @@ func New(queries *db.Queries) *Handler {
 }
 
 func (handler *Handler) RenderTutor(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-	component := auth.SignupForm()
+	component := auth.TutorSignup()
 	component.Render(context.Background(), w)
 }
 
