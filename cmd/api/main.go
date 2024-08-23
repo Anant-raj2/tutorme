@@ -49,6 +49,38 @@ type System struct {
 	Db   string
 }
 
+	// Create a logger that writes to console
+	consoleLogger := golog.NewLogger(golog.DEBUG, os.Stdout)
+
+	// Log some messages
+	consoleLogger.Debug("This is a debug message")
+	consoleLogger.Info("This is an info message")
+	consoleLogger.Warn("This is a warning message")
+	consoleLogger.Error("This is an error message")
+
+	// Create a logger that writes to a file
+	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		consoleLogger.Fatal("Failed to open log file: %v", err)
+	}
+	defer file.Close()
+
+	fileLogger := golog.NewLogger(golog.INFO, file)
+
+	// Log some messages to the file
+	fileLogger.Info("This message goes to the file")
+	fileLogger.Error("An error occurred: %s", "Something went wrong")
+
+	// Change the log level
+	fileLogger.SetLevel(golog.WARN)
+	fileLogger.Info("This message won't be logged because the level is set to WARN")
+	fileLogger.Warn("This warning message will be logged")
+
+	// Log to both console and file
+	multiWriter := io.MultiWriter(os.Stdout, file)
+	multiLogger := golog.NewLogger(golog.DEBUG, multiWriter)
+	multiLogger.Info("This message goes to both console and file")
+
 func SetupEnv() (*System, error) {
 	err := godotenv.Load()
 	if err != nil {

@@ -16,16 +16,6 @@ func LogHttp(h func(w http.ResponseWriter, r *http.Request, _ httprouter.Params)
 	}
 }
 
-package golog
-
-import (
-	"fmt"
-	"io"
-	"os"
-	"sync"
-	"time"
-)
-
 // LogLevel represents the severity of a log message
 type LogLevel int
 
@@ -60,6 +50,39 @@ func NewLogger(level LogLevel, output io.Writer) *Logger {
 	}
 }
 
+// SetOutput sets the output destination for the logger
+func (l *Logger) SetOutput(output io.Writer) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.output = output
+}
+
+// SetLevel sets the minimum log level
+func (l *Logger) SetLevel(level LogLevel) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.level = level
+}
+
+// log formats and writes a log message
+func (l *Logger) log(level LogLevel, format string, args ...interface{}) {
+	if level < l.level {
+		return
+	}
+
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	now := time.Now().Format("2006-01-02 15:04:05")
+	message := fmt.Sprintf(format, args...)
+	logEntry := fmt.Sprintf("[%s] %s: %s\n", now, levelNames[level], message)
+
+	l.output.Write([]byte(logEntry))
+
+	if level == FATAL {
+		os.Exit(1)
+	}
+}
 
 // Debug logs a debug message
 func (l *Logger) Debug(format string, args ...interface{}) {
