@@ -2,6 +2,25 @@ package auth
 
 import (
 	"context"
+	"crypto/rand"
+	"database/sql"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"net/http"
+	"regexp"
+	"strings"
+	"time"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
+	"github.com/lib/pq"
+	"golang.org/x/crypto/argon2"
+	"golang.org/x/crypto/bcrypt"
+)
+import (
+	"context"
 	"net/http"
 
 	"github.com/Anant-raj2/tutorme/internal/db"
@@ -27,7 +46,6 @@ func (h *Handler) RenderRegister(w http.ResponseWriter, r *http.Request, _ httpr
 	component := auth.Register()
 	component.Render(context.Background(), w)
 }
-
 
 // Configurable constants
 const (
@@ -326,3 +344,40 @@ func hashPassword(password string, salt []byte) (string, error) {
 		base64.RawStdEncoding.EncodeToString(hash)), nil
 }
 
+func verifyPassword(password, hashedPassword string, salt []byte) bool {
+	parts := strings.Split(hashedPassword, "$")
+	if len(parts) != 6 {
+		return false
+	}
+
+	var memory, time uint32
+	var threads uint8
+	_, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &time, &threads)
+	if err != nil {
+		return false
+	}
+
+	hash := argon2.IDKey([]byte(password), salt, time, memory, threads, ArgonKeyLength)
+	return subtle.ConstantTimeCompare(hash, []byte(parts[5])) == 1
+}
+
+func isValidPassword(password string) bool {
+	if len(password) < PasswordMinLength || len(password) > PasswordMaxLength {
+		return false
+	}
+
+	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(password)
+	hasLower := regexp.MustCompile(`[a-z]`).MatchString(password)
+	hasNumber := regexp.MustCompile(`[0-9]`).MatchString(password)
+	hasSpecial := regexp.MustCompile(`[!@#$%^&*(),.?":{}|<>]`).MatchString(password)
+
+	return hasUpper && hasLower && hasNumber && hasSpecial
+}
+
+type MFARequiredError struct {
+	Token string
+}
+
+func (e *MFARequiredError) Error() string {
+	return "multi-factor authentication required"
+}
