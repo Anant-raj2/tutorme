@@ -19,6 +19,31 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Could not load the environment")
 		os.Exit(1)
 	}
+	// Create a logger with custom options
+	logger := advancedlog.NewLogger(
+		advancedlog.WithLevel(advancedlog.DEBUG),
+		advancedlog.WithOutput(os.Stdout),
+		advancedlog.WithFormatter(&advancedlog.JSONFormatter{}),
+		advancedlog.WithHook(advancedlog.NewFileHook("app.log", 10, 5, 30)),
+		advancedlog.WithFields(advancedlog.Field{Key: "app", Value: "myapp"}),
+	)
+
+	// Log some messages
+	logger.Debug("This is a debug message")
+	logger.Info("This is an info message", advancedlog.Field{Key: "user", Value: "john"})
+
+	// Create a new logger with additional fields
+	userLogger := logger.WithField("user", "alice")
+	userLogger.Warn("This is a warning message")
+
+	// Log an error
+	err := someFunction()
+	if err != nil {
+		logger.Error("An error occurred", advancedlog.Field{Key: "error", Value: err.Error()})
+	}
+
+	// Fatal error
+	logger.Fatal("This is a fatal error")
 
 	var ctx context.Context = context.Background()
 
@@ -49,6 +74,7 @@ type System struct {
 	Db   string
 }
 
+func SetupEnv() (*System, error) {
 	// Create a logger that writes to console
 	consoleLogger := golog.NewLogger(golog.DEBUG, os.Stdout)
 
@@ -80,8 +106,6 @@ type System struct {
 	multiWriter := io.MultiWriter(os.Stdout, file)
 	multiLogger := golog.NewLogger(golog.DEBUG, multiWriter)
 	multiLogger.Info("This message goes to both console and file")
-
-func SetupEnv() (*System, error) {
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Could not load the environment file: %s", err)
