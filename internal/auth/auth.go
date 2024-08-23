@@ -381,3 +381,58 @@ type MFARequiredError struct {
 func (e *MFARequiredError) Error() string {
 	return "multi-factor authentication required"
 }
+
+type MFARequiredError struct {
+	Token string
+}
+
+func (e *MFARequiredError) Error() string {
+	return "multi-factor authentication required"
+}
+
+// Middleware for role-based access control
+func RoleMiddleware(requiredRoles ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token := r.Header.Get("Authorization")
+			if token == "" {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			claims := &jwt.MapClaims{}
+			_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+				return []byte("your_secret_key"), nil // Replace with your actual secret key
+			})
+
+			if err != nil {
+				http.Error(w, "Invalid token", http.StatusUnauthorized)
+				return
+			}
+
+			userRoles, ok := (*claims)["roles"].([]string)
+			if !ok {
+				http.Error(w, "Invalid token claims", http.StatusUnauthorized)
+				return
+			}
+
+			for _, requiredRole := range requiredRoles {
+				if !contains(userRoles, requiredRole) {
+					http.Error(w, "Forbidden", http.StatusForbidden)
+					return
+				}
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
