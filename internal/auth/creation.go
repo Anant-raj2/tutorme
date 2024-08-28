@@ -6,25 +6,34 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/jmoiron/sqlx"
 )
 
 type Tutor struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Subject   string `json:"subject"`
-	Experience int   `json:"experience"`
-	Rate      float64 `json:"rate"`
+	ID           int      `json:"id" db:"id"`
+	Name         string   `json:"name" db:"name"`
+	Subject      string   `json:"subject" db:"subject"`
+	Experience   int      `json:"experience" db:"experience"`
+	Rate         float64  `json:"rate" db:"rate"`
+	Availability []string `json:"availability" db:"availability"`
 }
 
-func setupCreation() {
+var db *sqlx.DB
+
+func main() {
 	var err error
-	db, err = sql.Open("postgres", "postgres://username:password@localhost/tutordb?sslmode=disable")
+	db, err = sqlx.Connect("postgres", "postgres://username:password@localhost/tutordb?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
+	router := mux.NewRouter()
+	router.HandleFunc("/tutors", createTutor).Methods("POST")
+
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 func createTutor(w http.ResponseWriter, r *http.Request) {
@@ -35,12 +44,25 @@ func createTutor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tx, err := db.Beginx()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	sqlStatement := `
-	INSERT INTO tutors (name, subject, experience, rate)
-	VALUES ($1, $2, $3, $4)
+	INSERT INTO tutors (name, subject, experience, rate, availability)
+	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id`
 
-	err = db.QueryRow(sqlStatement, tutor.Name, tutor.Subject, tutor.Experience, tutor.Rate).Scan(&tutor.ID)
+	err = tx.QueryRowx(sqlStatement, tutor.Name, tutor.Subject, tutor.Experience, tutor.Rate, tutor.Availability).Scan(&tutor.ID)
+	if err != nil {
+		tx.Rollback()
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
