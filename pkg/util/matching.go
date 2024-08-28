@@ -208,3 +208,56 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+func isCompatibleLearningStyle(tutor Tutor, student Student) bool {
+	// Implement learning style compatibility logic
+	return true // Placeholder
+}
+
+type MLModel struct {
+	weights *mat.Dense
+}
+
+func NewMLModel() *MLModel {
+	return &MLModel{
+		weights: mat.NewDense(5, 1, nil), // 5 features: subject match, experience, availability, rating, learning style
+	}
+}
+
+func (m *MLModel) Train() error {
+	// Implement training logic using historical data
+	// This is a placeholder implementation
+	m.weights.Set(0, 0, 0.3) // subject match weight
+	m.weights.Set(1, 0, 0.2) // experience weight
+	m.weights.Set(2, 0, 0.2) // availability weight
+	m.weights.Set(3, 0, 0.2) // rating weight
+	m.weights.Set(4, 0, 0.1) // learning style weight
+	return nil
+}
+
+func (m *MLModel) PredictMatchScore(tutor Tutor, student Student) float64 {
+	features := mat.NewDense(5, 1, []float64{
+		float64(len(getMatchedSubjects(tutor.Subjects, student.SubjectsNeeded))),
+		float64(tutor.Experience),
+		calculateAvailabilityMatch(tutor.Availability, student.PreferredTimes),
+		stat.Mean(tutor.Ratings, nil),
+		boolToFloat(isCompatibleLearningStyle(tutor, student)),
+	})
+
+	var result mat.Dense
+	result.Mul(m.weights.T(), features)
+	return result.At(0, 0)
+}
+
+func getMatchedSubjects(tutorSubjects, studentSubjects []string) []string {
+	var matched []string
+	for _, ts := range tutorSubjects {
+		for _, ss := range studentSubjects {
+			if ts == ss {
+				matched = append(matched, ts)
+				break
+			}
+		}
+	}
+	return matched
+}
