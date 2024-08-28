@@ -1,35 +1,40 @@
 package auth
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Student struct {
-	ID             int       `json:"id"`
+	gorm.Model
 	Name           string    `json:"name"`
-	Email          string    `json:"email"`
+	Email          string    `json:"email" gorm:"uniqueIndex"`
 	Age            int       `json:"age"`
 	Grade          int       `json:"grade"`
-	SubjectsNeeded []string  `json:"subjects_needed"`
+	SubjectsNeeded []string  `json:"subjects_needed" gorm:"type:text[]"`
 	CreatedAt      time.Time `json:"created_at"`
 }
 
-var db *sql.DB
+var db *gorm.DB
 
 func studentdb() {
 	var err error
-	db, err = sql.Open("postgres", "postgres://username:password@localhost/studentdb?sslmode=disable")
+	dsn := "host=localhost user=username password=password dbname=studentdb port=5432 sslmode=disable TimeZone=UTC"
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+
+	err = db.AutoMigrate(&Student{})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	router := mux.NewRouter()
 	router.HandleFunc("/students", createStudent).Methods("POST")
@@ -45,27 +50,46 @@ func createStudent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, err := db.Begin()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer tx.Rollback()
+	student.CreatedAt = time.Now()
 
-	sqlStatement := `
-	INSERT INTO students (name, email, age, grade, subjects_needed, created_at)
-	VALUES ($1, $2, $3, $4, $5, $6)
-	RETURNING id, created_at`
-
-	err = tx.QueryRow(sqlStatement, student.Name, student.Email, student.Age, student.Grade, pq.Array(student.SubjectsNeeded), time.Now()).Scan(&student.ID, &student.CreatedAt)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	result := db.Create(&student)
+	if result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(student)
+}
+
+func validateStudent(student *Student) error {
+	if student.Name == "" {
+		return errors.New("name is required")
+	}
+	if student.Email == "" {
+		return errors.New("email is required")
+	}
+	if student.Age < 5 || student.Age > 100 {
+		return errors.New("invalid age")
+	}
+	if student.Grade < 1 || student.Grade > 12 {
+		return errors.New("invalid grade")
+	}
+	return nil
+}
+
+func getStudentByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var student Student
+	result := db.First(&student, id)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			http.Error(w, "Student not found", http.StatusNotFound)
+		} else {
+			http.Error(w, result.Error.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
